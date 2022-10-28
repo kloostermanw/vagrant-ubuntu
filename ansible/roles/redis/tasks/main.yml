@@ -1,0 +1,50 @@
+---
+
+- name: Install redis
+  apt:
+    name: ['redis']
+    state: present
+
+- name: set vm.overcommit_memory in sysctl.conf
+  sysctl:
+    name: vm.overcommit_memory
+    value: 1
+    state: present
+
+- name: set net.core.somaxconn in sysctl.conf
+  sysctl:
+    name: net.core.somaxconn
+    value: 65535
+    state: present
+
+- name: Install sysfsutils for disabling transparent huge pages
+  become: yes
+  apt:
+    name: sysfsutils
+    state: latest
+
+- name: Disable transparent huge pages for performance
+  become: yes
+  lineinfile:
+    path: /etc/sysfs.conf
+    line: |
+      kernel/mm/transparent_hugepage/enabled = never
+- name: disable transparent huge pages for redis performance - live change
+  shell: echo never {{ ">" }} /sys/kernel/mm/transparent_hugepage/enabled
+
+- name: Start redis service as simple
+  become: yes
+  lineinfile:
+    path: /lib/systemd/system/redis-server.service
+    regexp: '^Type='
+    line: Type=simple
+
+- name: Start redis other bind-address
+  become: yes
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind '
+    line: bind 127.0.0.1 172.17.0.1 ::1
+
+- name: Start the redis service
+  service: name=redis state=restarted enabled=yes

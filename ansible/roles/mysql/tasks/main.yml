@@ -1,0 +1,16 @@
+---
+
+- name: Install mysql-server
+  apt:
+    name: [mysql-server]
+    state: present
+
+- name: Start mysql from different bind-address
+  become: yes
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address'
+    line: bind-address = 127.0.0.1,172.17.0.1
+
+- name: Restart the mysql service
+  service: name=mysql state=restarted enabled=yes

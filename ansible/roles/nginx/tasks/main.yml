@@ -1,0 +1,17 @@
+---
+
+- name: Install nginx prerequisites
+  apt:
+    name: [curl, gnupg2, ca-certificates, lsb-release, ubuntu-keyring]
+    state: present
+
+- name: Install nginx
+  apt: name=nginx state=present
+
+- name: nginx service state
+  service: name=nginx state=restarted enabled=yes
+
+- name: Install nginx prerequisites
+  apt:
+    name: [certbot, python3-certbot-dns-cloudflare, python3-certbot-nginx]
+    state: present

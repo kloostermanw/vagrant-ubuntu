@@ -1,0 +1,61 @@
+---
+- debug:
+    msg: "Performing apt update of server {{ ansible_hostname }}"
+
+- name: "Basic packets"
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - vim
+    - wget
+    - unzip
+    - open-vm-tools
+    - net-tools
+    - bind9-utils
+
+- name: Upgrade all packages
+  apt:
+    name: "*"
+    state: latest
+
+- name: Update repositories cache
+  apt:
+    update_cache: yes
+
+- name: Install ntp
+  apt: name=ntp state=present
+  tags: ntp
+
+- name: Configure ntp file
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf
+  tags: ntp
+  notify: Restart ntp
+
+- name: Start the ntp service
+  service: name=ntp state=started enabled=yes
+  tags: ntp
+
+- name: Enable and start ufw
+  service: name=ufw state=started enabled=yes
+  tags: firewall
+
+- name: Ensure the Dutch locale exists
+  community.general.locale_gen:
+    name: nl_NL
+    state: present
+
+- name: Ensure the Dutch locale exists
+  community.general.locale_gen:
+    name: nl_NL.UTF-8
+    state: present
+
+- name: Ensure the English locale exists
+  community.general.locale_gen:
+    name: en_US
+    state: present
+
+- name: Ensure the English locale exists
+  community.general.locale_gen:
+    name: en_US.UTF-8
+    state: present

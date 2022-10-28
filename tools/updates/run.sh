@@ -1,0 +1,1 @@
+ansible-playbook -i /opt/tools/updates/inventory.cfg /vagrant/playbook.yml
